@@ -6,17 +6,27 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 jobs:
+  pre-build:
+    runs-on: self-hosted
+    steps:
+      - name: Check if Docker is installed
+        run: |
+          if ! command -v docker &> /dev/null
+          then
+            echo "Docker is not installed!"
+            exit 1
+          else
+            echo "Docker is installed."
+          fi
   test-branch:
     if: github.ref != 'refs/heads/main'
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
       - name: Run a one-line script
         run: echo "Hello, world from test branch!"
   main-branch:
     if: github.ref == 'refs/heads/main'
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
       - name: Run a one-line script
         run: echo "Hello, world from main branch!"
