@@ -20,13 +20,13 @@ jobs:
           fi
   test-branch:
     if: github.ref != 'refs/heads/main'
-    runs-on: self-hosted
+    runs-on: [self-hosted, test]
     steps:
       - name: Run a one-line script
         run: echo "Hello, world from test branch!"
   main-branch:
     if: github.ref == 'refs/heads/main'
-    runs-on: self-hosted
+    runs-on: [self-hosted, main]
     steps:
       - name: Run a one-line script
         run: echo "Hello, world from main branch!"
