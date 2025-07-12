@@ -1,9 +1,9 @@
 name: simple pipeline
 on:
   push:
-    branches: ${{ vars.PUSH_BRANCHES }}
+    branches: [ "main", "test" ]
   pull_request:
-    branches: ${{ vars.PR_BRANCHES }}
+    branches: [ "main" ]
   workflow_dispatch:
 jobs:
   test-branch:
