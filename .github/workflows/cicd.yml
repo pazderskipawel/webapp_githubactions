@@ -1,12 +1,12 @@
 name: simple pipeline
 on:
   push:
-    branches: [ "main", "test" ]
+    branches: [ "test" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
 jobs:
-  pre-build:
+  pre-checks:
     runs-on: self-hosted
     steps:
       - name: Check if Docker is installed
@@ -19,14 +19,16 @@ jobs:
             echo "Docker is installed."
           fi
   test-branch:
+    needs: pre-checks
     if: github.ref != 'refs/heads/main'
     runs-on: [self-hosted, test]
     steps:
       - name: Run a one-line script
-        run: echo "Hello, world from test branch!"
+        run: echo "test branch"
   main-branch:
+    needs: pre-checks
     if: github.ref == 'refs/heads/main'
     runs-on: [self-hosted, main]
     steps:
       - name: Run a one-line script
-        run: echo "Hello, world from main branch!"
+        run: echo "main branch"
