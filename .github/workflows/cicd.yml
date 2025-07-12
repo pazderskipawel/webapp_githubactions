@@ -1,20 +1,19 @@
-
 name: simple pipeline
 on:
   push:
-    branches: [ "main", "test" ]
+    branches: ${{ vars.PUSH_BRANCHES }}
   pull_request:
-    branches: [ "main", "test" ]
+    branches: ${{ vars.PR_BRANCHES }}
   workflow_dispatch:
 jobs:
-  branch-test:
-    if: github.ref == 'refs/heads/test'
+  test-branch:
+    if: github.ref != 'refs/heads/main'
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       - name: Run a one-line script
         run: echo "Hello, world from test branch!"
-  branch-master:
+  main-branch:
     if: github.ref == 'refs/heads/main'
     runs-on: self-hosted
     steps:
