@@ -1,13 +1,11 @@
 name: simple pipeline
 on:
   push:
-    branches: [ "test" ]
+    branches: [ "test", "main" ]
     paths-ignore:
       - 'README.md'
   pull_request:
     branches: [ "main" ]
-    paths-ignore:
-      - 'README.md'
   workflow_dispatch:
 jobs:
   pre-checks:
@@ -49,7 +47,7 @@ jobs:
         run: docker inspect flask-app
   run-app:
     needs: [pre-checks, clean-last-build, build-app]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, main]
     steps:
       - name: Run Flask Container
