@@ -2,8 +2,12 @@ name: simple pipeline
 on:
   push:
     branches: [ "test" ]
+    paths-ignore:
+      - 'README.md'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'README.md'
   workflow_dispatch:
 jobs:
   pre-checks:
