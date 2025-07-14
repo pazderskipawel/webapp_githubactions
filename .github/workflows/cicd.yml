@@ -9,6 +9,8 @@ jobs:
   pre-checks:
     runs-on: self-hosted
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4.2.2
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
@@ -18,17 +20,24 @@ jobs:
           else
             echo "Docker is installed."
           fi
-  test-branch:
+  build-app:
     needs: pre-checks
-    if: github.ref != 'refs/heads/main'
     runs-on: [self-hosted, test]
     steps:
-      - name: Run a one-line script
-        run: echo "test branch"
-  main-branch:
+      - name: Cleanup Existing Container
+        run: |
+          if [ "$(docker ps -a -q -f name=flask-app)" ]; then
+            docker stop flask-app || true
+            docker rm flask-app || true
+          fi
+      - name: Build Docker Image
+        run: docker build -t flask-app ./webapp
+      - name: Inspect Docker Image
+        run: docker inspect flask-app
+  run-app:
     needs: pre-checks
     if: github.ref == 'refs/heads/main'
     runs-on: [self-hosted, main]
     steps:
-      - name: Run a one-line script
-        run: echo "main branch"
+      - name: Run Flask Container
+        run: docker run -d -p 5000:5000 --name flask-app flask-app
