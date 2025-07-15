@@ -14,8 +14,6 @@ jobs:
   pre-checks:
     runs-on: self-hosted
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4.2.2
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
@@ -40,6 +38,12 @@ jobs:
           if [ "$(docker images -q wordpress)" ]; then
             docker rmi wordpress || true
           fi
+  checkout-new-code:
+    needs: [pre-checks, clean-last-build]
+    runs-on: [self-hosted, test]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4.2.2
   create-env-file:
     needs: pre-checks
     runs-on: [self-hosted, test]
