@@ -62,4 +62,4 @@ jobs:
     runs-on: [self-hosted, main]
     steps:
       - name: Start WordPress Stack
-        run: docker compose up --env-file .env -f webapp/docker-compose.yml -d --build
+        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d
