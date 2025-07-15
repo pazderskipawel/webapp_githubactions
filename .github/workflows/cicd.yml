@@ -45,7 +45,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4.2.2
   create-env-file:
-    needs: pre-checks
+    needs: checkout-new-code
     runs-on: [self-hosted, test]
     steps:
       - name: Create .env file
@@ -55,7 +55,7 @@ jobs:
           echo "WORDPRESS_DB_PASSWORD=${{ secrets.WORDPRESS_DB_PASSWORD }}" >> .env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
   validate-app:
-    needs: [checkout-new-code, create-env-file]
+    needs: create-env-file
     runs-on: [self-hosted, test]
     steps:
       - name: Validate Docker Compose File
