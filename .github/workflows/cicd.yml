@@ -55,11 +55,11 @@ jobs:
     runs-on: [self-hosted, test]
     steps:
       - name: Validate Docker Compose File
-        run: docker compose --env-file ../.env -f webapp/docker-compose.yml config
+        run: docker compose --env-file .env -f webapp/docker-compose.yml config
   run-app:
     needs: [pre-checks, clean-last-build, validate-app, create-env-file]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, main]
     steps:
       - name: Start WordPress Stack
-        run: docker compose up --env-file ../.env -f webapp/docker-compose.yml -d --build
+        run: docker compose up --env-file .env -f webapp/docker-compose.yml -d --build
