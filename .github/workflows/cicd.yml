@@ -1,18 +1,19 @@
 name: simple pipeline
 on:
   push:
-    branches: [ "test", "main" ]
+    branches: [ "wordpress", "main" ]
     paths-ignore:
       - 'README.md'
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 jobs:
   pre-checks:
     runs-on: self-hosted
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4.2.2
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
@@ -29,26 +30,40 @@ jobs:
       - name: Cleanup Existing Container
         run: |
           echo "Cleaning up existing Docker container if it exists"
-          if [ "$(docker ps -a -q -f name=flask-app)" ]; then
-            docker stop flask-app || true
-            docker rm flask-app || true
+          if [ "$(docker ps -a -q -f name=wordpress)" ]; then
+            docker stop wordpress || true
+            docker rm wordpress || true
           fi
           echo "Cleaning up existing Docker image if it exists"
-          if [ "$(docker images -q flask-app)" ]; then
-            docker rmi flask-app || true
+          if [ "$(docker images -q wordpress)" ]; then
+            docker rmi wordpress || true
           fi
-  build-app:
-    needs: [pre-checks, clean-last-build]
+  checkout-new-code:
+    needs: clean-last-build
     runs-on: [self-hosted, test]
     steps:
-      - name: Build Docker Image
-        run: docker build -t flask-app ./webapp
-      - name: Inspect Docker Image
-        run: docker inspect flask-app
+      - name: Checkout Code
+        uses: actions/checkout@v4.2.2
+  create-env-file:
+    needs: checkout-new-code
+    runs-on: [self-hosted, test]
+    steps:
+      - name: Create .env file
+        run: |
+          echo "WORDPRESS_DB_NAME=${{ vars.WORDPRESS_DB_NAME }}" >> .env
+          echo "WORDPRESS_DB_USER=wpu${{ vars.WORDPRESS_DB_USER }}ser" >> .env
+          echo "WORDPRESS_DB_PASSWORD=${{ secrets.WORDPRESS_DB_PASSWORD }}" >> .env
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+  validate-app:
+    needs: create-env-file
+    runs-on: [self-hosted, test]
+    steps:
+      - name: Validate Docker Compose File
+        run: docker compose --env-file .env -f webapp/docker-compose.yml config
   run-app:
-    needs: [pre-checks, clean-last-build, build-app]
+    needs: validate-app
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, main]
     steps:
-      - name: Run Flask Container
-        run: docker run -d -p 5000:5000 --name flask-app flask-app
+      - name: Start WordPress Stack
+        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d
