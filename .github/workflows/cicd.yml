@@ -39,7 +39,7 @@ jobs:
             docker rmi wordpress || true
           fi
   checkout-new-code:
-    needs: [pre-checks, clean-last-build]
+    needs: clean-last-build
     runs-on: [self-hosted, test]
     steps:
       - name: Checkout Code
@@ -55,13 +55,13 @@ jobs:
           echo "WORDPRESS_DB_PASSWORD=${{ secrets.WORDPRESS_DB_PASSWORD }}" >> .env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
   validate-app:
-    needs: [pre-checks, clean-last-build, create-env-file]
+    needs: [checkout-new-code, create-env-file]
     runs-on: [self-hosted, test]
     steps:
       - name: Validate Docker Compose File
         run: docker compose --env-file .env -f webapp/docker-compose.yml config
   run-app:
-    needs: [pre-checks, clean-last-build, validate-app, create-env-file]
+    needs: validate-app
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, main]
     steps:
