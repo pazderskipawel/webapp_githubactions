@@ -1,12 +1,15 @@
 name: simple pipeline
 on:
   push:
-    branches: [ "test", "main" ]
+    branches: [ "wordpress", "main" ]
     paths-ignore:
       - 'README.md'
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   pre-checks:
     runs-on: self-hosted
@@ -29,26 +32,24 @@ jobs:
       - name: Cleanup Existing Container
         run: |
           echo "Cleaning up existing Docker container if it exists"
-          if [ "$(docker ps -a -q -f name=flask-app)" ]; then
-            docker stop flask-app || true
-            docker rm flask-app || true
+          if [ "$(docker ps -a -q -f name=wordpress)" ]; then
+            docker stop wordpress || true
+            docker rm wordpress || true
           fi
           echo "Cleaning up existing Docker image if it exists"
-          if [ "$(docker images -q flask-app)" ]; then
-            docker rmi flask-app || true
+          if [ "$(docker images -q wordpress)" ]; then
+            docker rmi wordpress || true
           fi
-  build-app:
+  validate-app:
     needs: [pre-checks, clean-last-build]
     runs-on: [self-hosted, test]
     steps:
-      - name: Build Docker Image
-        run: docker build -t flask-app ./webapp
-      - name: Inspect Docker Image
-        run: docker inspect flask-app
+      - name: Validate Docker Compose File
+        run: docker compose -f webapp/docker-compose.yml config
   run-app:
-    needs: [pre-checks, clean-last-build, build-app]
+    needs: [pre-checks, clean-last-build, validate-app]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, main]
     steps:
-      - name: Run Flask Container
-        run: docker run -d -p 5000:5000 --name flask-app flask-app
+      - name: Start WordPress Stack
+        run: docker compose up -f webapp/docker-compose.yml -d --build
