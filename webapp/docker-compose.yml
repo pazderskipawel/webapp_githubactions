@@ -2,8 +2,6 @@ services:
   wordpress:
     image: wordpress:latest
     container_name: wordpress
-    depends_on:
-      - wp-cli
     ports:
       - "8080:80"
     environment:
@@ -12,6 +10,7 @@ services:
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
     volumes:
+      - ./wordpress/wp-config.php:/var/www/html/wp-config.php
       - wordpress:/var/www/html
       - ./logs:/var/log/apache2
     networks:
@@ -19,8 +18,10 @@ services:
 
   wp-cli:
     image: wordpress:cli
+    container_name: wp-cli
     depends_on:
       - db
+      - wordpress
     entrypoint: sh -c "while ! wp core is-installed; do sleep 2; done && wp core install --title='$WORDPRESS_SITE_TITLE' --admin_user=$WORDPRESS_ADMIN_USER --admin_password=$WORDPRESS_ADMIN_PASSWORD --admin_email=$WORDPRESS_ADMIN_EMAIL"
     environment:
       WORDPRESS_SITE_TITLE: ${WORDPRESS_SITE_TITLE}
