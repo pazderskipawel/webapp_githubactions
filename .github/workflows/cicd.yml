@@ -23,23 +23,8 @@ jobs:
           else
             echo "Docker is installed."
           fi
-  clean-last-build:
-    needs: pre-checks
-    runs-on: [self-hosted]
-    steps:
-      - name: Cleanup Existing Container
-        run: |
-          echo "Cleaning up existing Docker container if it exists"
-          if [ "$(docker ps -a -q -f name=wordpress)" ]; then
-            docker stop wordpress || true
-            docker rm wordpress || true
-          fi
-          echo "Cleaning up existing Docker image if it exists"
-          if [ "$(docker images -q wordpress)" ]; then
-            docker rmi wordpress || true
-          fi
   checkout-new-code:
-    needs: clean-last-build
+    needs: pre-checks
     runs-on: [self-hosted]
     steps:
       - name: Checkout Code
