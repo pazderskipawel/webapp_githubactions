@@ -21,7 +21,7 @@ services:
     image: wordpress:cli
     depends_on:
       - db
-    entrypoint: sh -c "while ! wp core is-installed; do sleep 2; done && wp core install --url=localhost:8080 --title='$WORDPRESS_SITE_TITLE' --admin_user=$WORDPRESS_ADMIN_USER --admin_password=$WORDPRESS_ADMIN_PASSWORD --admin_email=$WORDPRESS_ADMIN_EMAIL"
+    entrypoint: sh -c "while ! wp core is-installed; do sleep 2; done && wp core install --title='$WORDPRESS_SITE_TITLE' --admin_user=$WORDPRESS_ADMIN_USER --admin_password=$WORDPRESS_ADMIN_PASSWORD --admin_email=$WORDPRESS_ADMIN_EMAIL"
     environment:
       WORDPRESS_SITE_TITLE: ${WORDPRESS_SITE_TITLE}
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER}
