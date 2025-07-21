@@ -16,7 +16,6 @@ services:
       - ./logs:/var/log/apache2
     networks:
       - wp-net
-    user: "1001:1001"
 
   db:
     image: mysql:8.0
@@ -32,7 +31,6 @@ services:
       - ./backups:/backups
     networks:
       - wp-net
-    user: "1001:1001"
 
 volumes:
   db_data:
