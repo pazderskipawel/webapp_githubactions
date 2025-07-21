@@ -50,8 +50,12 @@ jobs:
     steps:
       - name: Create .env file
         run: |
+          echo "WORDPRESS_SITE_TITLE=${{ vars.WORDPRESS_SITE_TITLE }}" >> .env
+          echo "WORDPRESS_ADMIN_USER=${{ vars.WORDPRESS_ADMIN_USER }}" >> .env
+          echo "WORDPRESS_ADMIN_PASSWORD=${{ secrets.WORDPRESS_ADMIN_PASSWORD }}" >> .env
+          echo "WORDPRESS_ADMIN_EMAIL=${{ vars.WORDPRESS_ADMIN_EMAIL }}" >> .env      
           echo "WORDPRESS_DB_NAME=${{ vars.WORDPRESS_DB_NAME }}" >> .env
-          echo "WORDPRESS_DB_USER=wpu${{ vars.WORDPRESS_DB_USER }}ser" >> .env
+          echo "WORDPRESS_DB_USER=${{ vars.WORDPRESS_DB_USER }}" >> .env
           echo "WORDPRESS_DB_PASSWORD=${{ secrets.WORDPRESS_DB_PASSWORD }}" >> .env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
   mount-volumes:
