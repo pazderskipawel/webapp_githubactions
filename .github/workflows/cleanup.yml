@@ -1,4 +1,4 @@
-name: Clean Last Build
+name: docker cleanup
 
 on:
   workflow_dispatch:
