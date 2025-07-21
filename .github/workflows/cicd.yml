@@ -1,7 +1,7 @@
 name: simple pipeline
 on:
   push:
-    branches: [ "wordpress", "main" ]
+    branches: [ "wp", "main" ]
     paths-ignore:
       - 'README.md'
   pull_request:
@@ -59,7 +59,7 @@ jobs:
     runs-on: [self-hosted, test]
     steps:
       - name: Validate Docker Compose File
-        run: docker compose --env-file .env -f webapp/docker-compose.yml config
+        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --dry-run
   run-app:
     needs: validate-app
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
