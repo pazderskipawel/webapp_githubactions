@@ -1,0 +1,14 @@
+name: Clean Last Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clean-docker-resources:
+    if: github.actor == github.repository_owner
+    runs-on: [self-hosted, test]
+    steps:
+      - name: Stop and remove containers, images, volumes
+        run: |
+          docker compose -f webapp/docker-compose.yml down -v --rmi all --remove-orphans
+          docker system prune -af --volumes
