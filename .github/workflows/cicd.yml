@@ -23,8 +23,27 @@ jobs:
           else
             echo "Docker is installed."
           fi
-  checkout-new-code:
+  clean-last-build:
     needs: pre-checks
+    runs-on: [self-hosted]
+    steps:
+      - name: Cleanup Existing Container
+        run: |
+          echo "Cleaning up existing Docker container if it exists"
+          if [ "$(docker ps -a -q -f name=wordpress)" ]; then
+            docker stop wordpress || true
+            docker rm wordpress || true
+          fi
+          if [ "$(docker ps -a -q -f name=wp-cli)" ]; then
+            docker stop wp-cli || true
+            docker rm wp-cli || true
+          fi
+          echo "Cleaning up existing Docker image if it exists"
+          if [ "$(docker images -q wordpress)" ]; then
+            docker rmi wordpress || true
+          fi
+  checkout-new-code:
+    needs: clean-last-build
     runs-on: [self-hosted]
     steps:
       - name: Checkout Code
@@ -49,7 +68,7 @@ jobs:
     steps:
       - name: Prepare bind mount directories
         run: |
-          export DIRS="webapp/logs webapp/backups"
+          export DIRS="webapp/wordpress webapp/logs webapp/backups"
           mkdir -p $DIRS
           chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} $DIRS
   validate-app:
