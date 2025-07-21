@@ -1,4 +1,4 @@
-name: simple pipeline
+name: main
 on:
   push:
     branches: [ "database", "main" ]
