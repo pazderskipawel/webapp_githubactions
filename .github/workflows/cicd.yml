@@ -1,7 +1,7 @@
 name: simple pipeline
 on:
   push:
-    branches: [ "wordpress", "main" ]
+    branches: [ "wp", "main" ]
     paths-ignore:
       - 'README.md'
   pull_request:
@@ -25,7 +25,7 @@ jobs:
           fi
   clean-last-build:
     needs: pre-checks
-    runs-on: [self-hosted, test]
+    runs-on: [self-hosted]
     steps:
       - name: Cleanup Existing Container
         run: |
@@ -40,13 +40,13 @@ jobs:
           fi
   checkout-new-code:
     needs: clean-last-build
-    runs-on: [self-hosted, test]
+    runs-on: [self-hosted]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4.2.2
   create-env-file:
     needs: checkout-new-code
-    runs-on: [self-hosted, test]
+    runs-on: [self-hosted]
     steps:
       - name: Create .env file
         run: |
@@ -54,12 +54,21 @@ jobs:
           echo "WORDPRESS_DB_USER=wpu${{ vars.WORDPRESS_DB_USER }}ser" >> .env
           echo "WORDPRESS_DB_PASSWORD=${{ secrets.WORDPRESS_DB_PASSWORD }}" >> .env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
-  validate-app:
+  mount-volumes:
     needs: create-env-file
-    runs-on: [self-hosted, test]
+    runs-on: [self-hosted]
+    steps:
+      - name: Prepare bind mount directories
+        run: |
+          export DIRS="webapp/wordpress webapp/logs webapp/backups"
+          mkdir -p $DIRS
+          chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} $DIRS
+  validate-app:
+    needs: mount-volumes
+    runs-on: [self-hosted]
     steps:
       - name: Validate Docker Compose File
-        run: docker compose --env-file .env -f webapp/docker-compose.yml config
+        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --dry-run
   run-app:
     needs: validate-app
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
