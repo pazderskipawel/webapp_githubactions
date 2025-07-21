@@ -1,7 +1,7 @@
 name: main
 on:
   push:
-    branches: [ "database", "main" ]
+  #  branches: [ "database", "main" ]
     paths-ignore:
       - 'README.md'
   #pull_request:
