@@ -61,7 +61,7 @@ jobs:
       - name: Prepare bind mount directories
         run: |
           mkdir -p wordpress logs backups
-          chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} wordpress logs backups
+          chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} webapp/wordpress webapp/logs webapp/backups
   validate-app:
     needs: mount-volumes
     runs-on: [self-hosted]
