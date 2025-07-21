@@ -49,7 +49,7 @@ jobs:
     steps:
       - name: Prepare bind mount directories
         run: |
-          export DIRS="webapp/wordpress webapp/logs webapp/backups"
+          export DIRS="webapp/logs webapp/backups"
           mkdir -p $DIRS
           chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} $DIRS
   validate-app:
