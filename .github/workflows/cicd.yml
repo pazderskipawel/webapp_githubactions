@@ -4,7 +4,7 @@ on:
   #  branches: [ "database", "main" ]
     paths-ignore:
       - 'README.md'
-  #pull_request:
+  # pull_request:
   #  branches: [ "main" ]
   workflow_dispatch:
 concurrency:
@@ -27,21 +27,10 @@ jobs:
     needs: pre-checks
     runs-on: [self-hosted]
     steps:
-      - name: Cleanup Existing Container
+      - name: clean up last build
         run: |
-          echo "Cleaning up existing Docker container if it exists"
-          if [ "$(docker ps -a -q -f name=wordpress)" ]; then
-            docker stop wordpress || true
-            docker rm wordpress || true
-          fi
-          if [ "$(docker ps -a -q -f name=wp-cli)" ]; then
-            docker stop wp-cli || true
-            docker rm wp-cli || true
-          fi
-          echo "Cleaning up existing Docker image if it exists"
-          if [ "$(docker images -q wordpress)" ]; then
-            docker rmi wordpress || true
-          fi
+          docker compose -f webapp/docker-compose.yml down -v --rmi all --remove-orphans
+          docker system prune -af --volumes
   checkout-new-code:
     needs: clean-last-build
     runs-on: [self-hosted]
@@ -63,24 +52,38 @@ jobs:
           echo "WORDPRESS_DB_PASSWORD=${{ secrets.WORDPRESS_DB_PASSWORD }}" >> .env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
   mount-volumes:
-    needs: create-env-file
+    needs: checkout-new-code
     runs-on: [self-hosted]
     steps:
       - name: Prepare bind mount directories
         run: |
-          export DIRS="webapp/wordpress webapp/logs webapp/backups"
+          export DIRS="webapp/backups"
           mkdir -p $DIRS
           chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} $DIRS
+  build-wordpress-image:
+    needs: 
+      - mount-volumes
+      - create-env-file
+    runs-on: [self-hosted]
+    steps:
+      - name: Build WordPress Docker Image
+        run: docker build -t wordpress_with_cli:latest -f webapp/Dockerfile .
   validate-app:
-    needs: mount-volumes
+    needs: build-wordpress-image
     runs-on: [self-hosted]
     steps:
       - name: Validate Docker Compose File
         run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --dry-run
-  run-app:
+  run-app-dev:
+    needs: validate-app
+    runs-on: [self-hosted]
+    steps:
+      - name: Start WordPress dev Stack
+        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --build
+  run-app-prod:
     needs: validate-app
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, main]
     steps:
-      - name: Start WordPress Stack
+      - name: Start WordPress prod Stack
         run: docker compose --env-file .env -f webapp/docker-compose.yml up -d
