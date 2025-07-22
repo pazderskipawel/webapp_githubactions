@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   pre-checks:
-    runs-on: self-hosted
+    runs-on: [self-hosted]
     steps:
       - name: Check if Docker is installed
         run: |
