@@ -1,4 +1,5 @@
 #!/bin/bash
+su deployuser
 cd /var/www/html
 # Finish installation of wordpress using cli
 su deployuser -c "

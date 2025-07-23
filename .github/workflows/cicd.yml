@@ -14,6 +14,8 @@ jobs:
   pre-checks:
     runs-on: [self-hosted]
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
@@ -62,10 +64,10 @@ jobs:
           docker exec wordpress /bin/bash -c "adduser --disabled-password --gecos '' deployuser"
       - name: Install WP-CLI
         run: |
-          docker exec wordpress su deployuser /bin/bash -c "/var/www/wordpress-config/installwpcli.sh"
+          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/installwpcli.sh"
       - name: Configure WordPress
         run: |
-          docker exec wordpress su deployuser /bin/bash -c "/var/www/wordpress-config/configurewp.sh"
+          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/configurewp.sh"
       - name: allow http
         run: |
-          docker exec wordpress su deployuser /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
+          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
