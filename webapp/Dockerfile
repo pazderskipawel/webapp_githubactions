@@ -1,5 +1,9 @@
 FROM wordpress:latest
 
+ARG UID=1000
+ARG GID=1000
+ARG USERNAME=user
+
 # Create group and user with specified UID/GID
 RUN groupadd -g $GID $USERNAME && \
 useradd -m -u $UID -g $GID -s /bin/bash $USERNAME
