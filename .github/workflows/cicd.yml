@@ -23,12 +23,12 @@ jobs:
           else
             echo "Docker is installed."
           fi
-      - name: clean up last build
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+      - name: Clean up last build
         run: |
           docker compose -f webapp/docker-compose.yml down -v --rmi all --remove-orphans
           docker system prune -af --volumes
-      - name: Checkout Code
-        uses: actions/checkout@v4.2.2
   create-env-file:
     needs: pre-checks
     runs-on: [self-hosted]
