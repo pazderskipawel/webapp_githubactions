@@ -91,7 +91,7 @@ jobs:
           docker exec wordpress /bin/bash -c "rm -f /var/www/html/configcli.sh"
   allow-http-on-dev:
     needs: modify-container-config
-    if: github.ref != 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref != 'refs/heads/main' && github.event_name == 'push' && needs.modify-container-config.result == 'success'
     runs-on: [self-hosted, test]
     steps:
       - name: allow http on dev
