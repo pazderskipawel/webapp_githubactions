@@ -52,28 +52,22 @@ jobs:
         run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --dry-run
   run-app:
     needs: validate-app
-    if: github.ref != 'refs/heads/main' && github.event_name == 'push'
-    runs-on: [self-hosted, test]
+    runs-on: [self-hosted]
     steps:
       - name: Start WordPress Containers
         run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --build
       - name: Copy configuration files to container
         run: |
-          docker exec wordpress /bin/bash -c "chmod +x /var/www/wordpress-config/*.sh"  
-          docker exec wordpress /bin/bash -c "cp -r /var/www/wordpress-config/* /var/www/html/"
-          docker exec wordpress /bin/bash -c "chown -R www-data:www-data /var/www/html/*"
+          docker exec wordpress /bin/bash -c "chmod +x /var/www/wordpress-config/*.sh"
       - name: Add user for wordpress CLI
         run: |
           docker exec wordpress /bin/bash -c "adduser --disabled-password --gecos '' deployuser"
-      - name: switch to user and move to wordpress root directory
-        run: |
-          docker exec wordpress /bin/bash -c "su deployuser -c 'cd /var/www/html/'"
       - name: Install WP-CLI
         run: |
-          docker exec wordpress /bin/bash -c "./installwpcli.sh"
+          docker exec wordpress su deployuser /bin/bash -c "/var/www/wordpress-config/installwpcli.sh"
       - name: Configure WordPress
         run: |
-          docker exec wordpress /bin/bash -c "./configurewp.sh"
+          docker exec wordpress su deployuser /bin/bash -c "/var/www/wordpress-config/configurewp.sh"
       - name: allow http
         run: |
-          docker exec wordpress /bin/bash -c "./allowhttp.sh"
+          docker exec wordpress su deployuser /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
