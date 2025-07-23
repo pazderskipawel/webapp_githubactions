@@ -15,11 +15,10 @@ services:
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER}
       WORDPRESS_ADMIN_PASSWORD: ${WORDPRESS_ADMIN_PASSWORD}
       WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL}
-    entrypoint: sh -c "chmod +x /var/www/entrypoint.sh && ./var/www/entrypoint.sh"
     volumes:
      - ./wordpress/wp-config.php:/var/www/html/wp-config.php
      - ./wordpress/entrypoint.sh:/var/www/entrypoint.sh
-
+    entrypoint: sh -c "sleep 10 && chmod +x /var/www/entrypoint.sh && ./var/www/entrypoint.sh"
     networks:
       - wp-net
 
