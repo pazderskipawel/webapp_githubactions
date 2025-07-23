@@ -8,8 +8,10 @@ until echo > /dev/tcp/db/3306; do
   echo "Waiting for database connection..."
   sleep 5
 done
+# Create non-root user for wp-cli
+adduser --disabled-password --gecos '' deployuser
 # Finish installation of wordpress using cli
-su www-data -c "
+su deployuser -c "
 cd /var/www/html &&
 exec wp core install \
   --url=${WORDPRESS_URL} \
