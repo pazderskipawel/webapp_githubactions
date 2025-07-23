@@ -17,24 +17,14 @@ services:
       WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL}
     entrypoint: >
       sh -c "
-        # Create a temporary user with host UID/GID
-        adduser --disabled-password --gecos '' deployuser && \
-        usermod -u 1001 deployuser && \
-        groupmod -g 1001 deployuser && \
-
+        # Create a temporary user
+        adduser --disabled-password --gecos '' deployuser
         # Ensure wp-config.php is owned by www-data (33:33 by default)
         chown 33:33 /var/www/html/wp-config.php && \
-
         # Run wp-cli as deployuser only if WordPress isn't installed
         su deployuser -c '
-          wp core is-installed || wp core install \
-            --url=${WORDPRESS_URL} \
-            --title=\"${WORDPRESS_SITE_TITLE}\" \
-            --admin_user=\"${WORDPRESS_ADMIN_USER}\" \
-            --admin_password=\"${WORDPRESS_ADMIN_PASSWORD}\" \
-            --admin_email=\"${WORDPRESS_ADMIN_EMAIL}\"
+          wp core is-installed || wp core install --url=${WORDPRESS_URL} --title=\"${WORDPRESS_SITE_TITLE}\"  --admin_user=\"${WORDPRESS_ADMIN_USER}\" --admin_password=\"${WORDPRESS_ADMIN_PASSWORD}\" --admin_email=\"${WORDPRESS_ADMIN_EMAIL}\"
         ' && \
-
         # Start Apache as normal
         exec apache2-foreground
       "
