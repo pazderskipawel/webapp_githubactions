@@ -59,7 +59,7 @@ jobs:
     runs-on: [self-hosted]
     steps:
       - name: Build WordPress Docker Image
-        run: docker build -t wordpress_with_cli:latest -f webapp/Dockerfile .
+        run: docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) --build-arg USERNAME=$(whoami) -t wordpress_with_cli:latest -f webapp/Dockerfile .
   validate-app:
     needs: build-wordpress-image
     runs-on: [self-hosted]
