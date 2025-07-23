@@ -62,6 +62,7 @@ jobs:
         run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --dry-run
   run-app-dev:
     needs: validate-app
+    if: github.ref != 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted]
     steps:
       - name: Start WordPress dev Stack
