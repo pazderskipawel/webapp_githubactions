@@ -83,14 +83,14 @@ jobs:
     steps:
       - name: Modify WordPress container configuration
         run: |
-          docker exec wordpress /bin/bash -c "cp /var/www/wordpress-config/ /var/www/html/"
+          docker exec wordpress /bin/bash -c "cp -r /var/www/wordpress-config/* /var/www/html/"
           docker exec wordpress /bin/bash -c "chown -R www-data:www-data /var/www/html/*"
           docker exec wordpress /bin/bash -c "chmod +x /var/www/html/configcli.sh"
           docker exec wordpress /bin/bash -c "adduser --disabled-password --gecos '' deployuser"
           docker exec wordpress /bin/bash -c "cd /var/www/html/ && bash configcli.sh"
           docker exec wordpress /bin/bash -c "rm -f /var/www/html/configcli.sh"
   allow-http-on-dev:
-    needs: validate-app
+    needs: modify-container-config
     if: github.ref != 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, test]
     steps:
