@@ -73,3 +73,18 @@ jobs:
     steps:
       - name: Start WordPress prod Stack
         run: docker compose --env-file .env -f webapp/docker-compose.yml up -d
+  modify-container-config:
+    #dev or prod need to be successful (https://stackoverflow.com/a/66358138)
+    needs: [run-app-dev, run-app-prod]
+    if: |
+      always() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure')
+    runs-on: [self-hosted]
+    steps:
+      - name: Modify WordPress container configuration
+        run: |
+          docker exec -it wordpress /bin/bash -c "chown -R www-data:www-data /var/www/wordpress-config/" 
+          docker exec -it wordpress /bin/bash -c "adduser --disabled-password --gecos '' deployuser"
+          docker exec -it wordpress /bin/bash -c "mv /var/www/wordpress-config/wp-config.php /var/www/html/wp-config.php"
+          docker exec -it wordpress /bin/bash -c "chmod +x /var/www/wordpress-config/configcli.sh"
+          docker exec -it wordpress /bin/bash -c "./var/www/wordpress-config/configcli.sh"
+
