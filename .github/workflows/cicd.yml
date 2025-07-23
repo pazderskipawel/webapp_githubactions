@@ -89,11 +89,12 @@ jobs:
           docker exec wordpress /bin/bash -c "adduser --disabled-password --gecos '' deployuser"
           docker exec wordpress /bin/bash -c "cd /var/www/html/ && bash configcli.sh"
           docker exec wordpress /bin/bash -c "rm -f /var/www/html/configcli.sh"
-  allow-http:
+  allow-http-on-dev:
     needs: modify-container-config
+    if: github.ref != 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, test]
     steps:
-      - name: allow http
+      - name: allow http on dev
         run: |
           wp option update siteurl http://localhost:8080 --allow-root
           wp option update home http://localhost:8080 --allow-root
