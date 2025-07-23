@@ -1,19 +1,21 @@
 name: main pipeline
 on:
   push:
-  #  branches: [ "database", "main" ]
+  # branches: [ "database", "main" ]
     paths-ignore:
       - 'README.md'
   # pull_request:
-  #  branches: [ "main" ]
+  # branches: [ "main" ]
   workflow_dispatch:
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   pre-checks:
     runs-on: [self-hosted]
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
@@ -23,16 +25,10 @@ jobs:
           else
             echo "Docker is installed."
           fi
-      - name: Checkout code
-        uses: actions/checkout@v4.2.2
       - name: Clean up last build
         run: |
           docker compose -f webapp/docker-compose.yml down -v --rmi all --remove-orphans
           docker system prune -af --volumes
-  create-env-file:
-    needs: pre-checks
-    runs-on: [self-hosted]
-    steps:
       - name: Create .env file
         run: |
           echo "WORDPRESS_SITE_TITLE=${{ vars.WORDPRESS_SITE_TITLE }}" >> .env
@@ -43,58 +39,35 @@ jobs:
           echo "WORDPRESS_DB_USER=${{ vars.WORDPRESS_DB_USER }}" >> .env
           echo "WORDPRESS_DB_PASSWORD=${{ secrets.WORDPRESS_DB_PASSWORD }}" >> .env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
-  mount-volumes:
-    needs: pre-checks
-    runs-on: [self-hosted]
-    steps:
       - name: Prepare bind mount directories
         run: |
           export DIRS="webapp/backups"
           mkdir -p $DIRS
           chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} $DIRS
   validate-app:
-    needs: 
-      - mount-volumes
-      - create-env-file
+    needs: pre-checks
     runs-on: [self-hosted]
     steps:
       - name: Validate Docker Compose File
         run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --dry-run
-  run-app-dev:
+  run-app:
     needs: validate-app
-    if: github.ref != 'refs/heads/main' && github.event_name == 'push'
-    runs-on: [self-hosted, test]
-    steps:
-      - name: Start WordPress dev Stack
-        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --build
-  run-app-prod:
-    needs: validate-app
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: [self-hosted, main]
-    steps:
-      - name: Start WordPress prod Stack
-        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d
-  modify-container-config:
-    #dev or prod need to be successful (https://stackoverflow.com/a/66358138)
-    needs: [run-app-dev, run-app-prod]
-    if: |
-      always() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure')
     runs-on: [self-hosted]
     steps:
-      - name: Modify WordPress container configuration
+      - name: Start WordPress Containers
+        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --build
+      - name: Copy configuration files to container
         run: |
-          docker exec wordpress /bin/bash -c "cp -r /var/www/wordpress-config/* /var/www/html/"
-          docker exec wordpress /bin/bash -c "chown -R www-data:www-data /var/www/html/*"
-          docker exec wordpress /bin/bash -c "chmod +x /var/www/html/configcli.sh"
+          docker exec wordpress /bin/bash -c "chmod +x /var/www/wordpress-config/*.sh"
+      - name: Add user for wordpress CLI
+        run: |
           docker exec wordpress /bin/bash -c "adduser --disabled-password --gecos '' deployuser"
-          docker exec wordpress /bin/bash -c "cd /var/www/html/ && bash configcli.sh"
-          docker exec wordpress /bin/bash -c "rm -f /var/www/html/configcli.sh"
-  allow-http-on-dev:
-    needs: modify-container-config
-    if: github.ref != 'refs/heads/main' && github.event_name == 'push' && needs.modify-container-config.result == 'success'
-    runs-on: [self-hosted, test]
-    steps:
-      - name: allow http on dev
+      - name: Install WP-CLI
         run: |
-          wp option update siteurl http://localhost:8080 --allow-root
-          wp option update home http://localhost:8080 --allow-root
+          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/installwpcli.sh"
+      - name: Configure WordPress
+        run: |
+          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/configurewp.sh"
+      - name: allow http
+        run: |
+          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
