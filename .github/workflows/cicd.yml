@@ -86,6 +86,6 @@ jobs:
           docker exec wordpress /bin/bash -c "cp /var/www/wordpress-config/* /var/www/html/"
           docker exec wordpress /bin/bash -c "chown -R www-data:www-data /var/www/html/*" 
           docker exec wordpress /bin/bash -c "chmod +x /var/www/wordpress-config/configcli.sh"
-          docker exec wordpress /bin/bash -c "cd /var/www/html/ && bash /configcli.sh"
+          docker exec wordpress /bin/bash -c "cd /var/www/html/ && bash configcli.sh"
           docker exec wordpress /bin/bash -c "rm -f /var/www/html/configcli.sh"
 
