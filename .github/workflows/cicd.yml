@@ -52,16 +52,10 @@ jobs:
           export DIRS="webapp/backups"
           mkdir -p $DIRS
           chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} $DIRS
-  build-wordpress-image:
+  validate-app:
     needs: 
       - mount-volumes
       - create-env-file
-    runs-on: [self-hosted]
-    steps:
-      - name: Build WordPress Docker Image
-        run: docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) --build-arg USERNAME=$(whoami) -t wordpress_with_cli:latest -f webapp/Dockerfile .
-  validate-app:
-    needs: build-wordpress-image
     runs-on: [self-hosted]
     steps:
       - name: Validate Docker Compose File
