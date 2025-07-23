@@ -14,6 +14,8 @@ jobs:
   pre-checks:
     runs-on: [self-hosted]
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
@@ -23,8 +25,6 @@ jobs:
           else
             echo "Docker is installed."
           fi
-      - name: Checkout code
-        uses: actions/checkout@v4.2.2
       - name: Clean up last build
         run: |
           docker compose -f webapp/docker-compose.yml down -v --rmi all --remove-orphans
