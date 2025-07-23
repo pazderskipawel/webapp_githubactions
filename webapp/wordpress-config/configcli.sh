@@ -4,7 +4,7 @@ curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.pha
   && chmod +x wp-cli.phar \
   && mv wp-cli.phar /usr/local/bin/wp
 # Wait for DB to be ready
-until wp db query "SHOW TABLES;" --allow-root; do
+until echo > /dev/tcp/db/3306; do
   echo "Waiting for database connection..."
   sleep 5
 done
