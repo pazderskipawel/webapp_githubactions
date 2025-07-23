@@ -23,22 +23,14 @@ jobs:
           else
             echo "Docker is installed."
           fi
-  clean-last-build:
-    needs: pre-checks
-    runs-on: [self-hosted]
-    steps:
       - name: clean up last build
         run: |
           docker compose -f webapp/docker-compose.yml down -v --rmi all --remove-orphans
           docker system prune -af --volumes
-  checkout-new-code:
-    needs: clean-last-build
-    runs-on: [self-hosted]
-    steps:
       - name: Checkout Code
         uses: actions/checkout@v4.2.2
   create-env-file:
-    needs: checkout-new-code
+    needs: pre-checks
     runs-on: [self-hosted]
     steps:
       - name: Create .env file
@@ -52,7 +44,7 @@ jobs:
           echo "WORDPRESS_DB_PASSWORD=${{ secrets.WORDPRESS_DB_PASSWORD }}" >> .env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
   mount-volumes:
-    needs: checkout-new-code
+    needs: pre-checks
     runs-on: [self-hosted]
     steps:
       - name: Prepare bind mount directories
