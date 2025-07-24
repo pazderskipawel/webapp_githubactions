@@ -72,7 +72,7 @@ jobs:
         run: |
           docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
   notify-on-fail-test:
-    needs: [pre-checks, validate-app, run-app]
+    #needs: [pre-checks, validate-app, run-app]
     runs-on: [self-hosted]
     if: always()
     steps:
