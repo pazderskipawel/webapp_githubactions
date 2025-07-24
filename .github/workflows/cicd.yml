@@ -72,13 +72,13 @@ jobs:
         run: |
           docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
   notify-on-fail-test:
-    #needs: [pre-checks, validate-app, run-app]
+    needs: [pre-checks, validate-app, run-app]
     runs-on: [self-hosted]
-    if: always()
     steps:
       - name: Notify Discord on failure
         uses: sarisia/actions-status-discord@v1
-        if: failure()
+        #if: failure()
+        if: always()
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
           status: ${{ job.status }}
