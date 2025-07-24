@@ -71,7 +71,7 @@ jobs:
       - name: allow http
         run: |
           docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
-  notify:
+  notify-on-fail:
     needs: [pre-checks, validate-app, run-app]
     runs-on: [self-hosted]
     if: failure()
