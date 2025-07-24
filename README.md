@@ -1,4 +1,4 @@
-[![CI](https://github.com/pazderskipawel/githubactions/actions/workflows/cicd.yml/badge.svg)](https://github.com/pazderskipawel/githubactions/actions/workflows/cicd.yml)
+[![CI](https://github.com/pazderskipawel/githubactions/actions/workflows/cicd.yml/badge.svg?branch=main)](https://github.com/pazderskipawel/githubactions/actions/workflows/cicd.yml?query=branch%3Amain)
 
 wordpress website which runs on docker started from github actions pipeline
 
