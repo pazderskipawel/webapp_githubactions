@@ -71,10 +71,10 @@ jobs:
       - name: allow http
         run: |
           docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
-  notify-on-fail:
+  notify-on-fail-test:
     needs: [pre-checks, validate-app, run-app]
     runs-on: [self-hosted]
-    if: failure()
+    if: always()
     steps:
       - name: Notify Discord on failure
         uses: sarisia/actions-status-discord@v1
@@ -82,7 +82,7 @@ jobs:
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
           status: ${{ job.status }}
-          title: "❌ Build Failed"
+          title: "❌ Build Failed - test"
           description: "Job `${{ github.job }}` in workflow `${{ github.workflow }}` failed on `${{ github.ref_name }}`."
           color: 0xff0000
  
