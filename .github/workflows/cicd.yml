@@ -103,7 +103,6 @@ jobs:
           docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
 
   notify-on-fail:
-    needs: [set-up-environment, validate-app, run-app]
     runs-on: [self-hosted]
     steps:
       - name: Notify Discord on failure
