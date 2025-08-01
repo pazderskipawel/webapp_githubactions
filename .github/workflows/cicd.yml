@@ -87,7 +87,7 @@ jobs:
       - name: Start WordPress Containers
         run: |
           echo "for detailed wiev run command 'docker compose --env-file .env -f webapp/docker-compose.yml up -d --build'" 
-          docker compose --env-file .env -f webapp/docker-compose.yml up -d --build
+          docker compose --env-file .env -f webapp/docker-compose.yml up -d
       - name: Copy Nginx configuration files to container to enable https
         # This step is necessary to the server to handle HTTPS using mkcert.
         run: |
