@@ -62,9 +62,11 @@ jobs:
         run: | 
           if [ ! -f ./localhost.pem ] || [ ! -f ./localhost-key.pem ]; then
             echo "Creating certificates..."
-            echo ${{ secrets.RUNNER_SUDO_PASSWD }} | sudo -S apt update
-            sudo apt install libnss3-tools mkcert -y 
-            mkcert -install
+            if ! command -v mkcert &> /dev/null; then
+              echo "${{ secrets.RUNNER_SUDO_PASSWD }}" | sudo -S apt update -y
+              echo "${{ secrets.RUNNER_SUDO_PASSWD }}" | sudo -S apt install -y libnss3-tools mkcert
+              mkcert -install
+            fi
             mkcert localhost
           else
             echo "Certificates already exist."
