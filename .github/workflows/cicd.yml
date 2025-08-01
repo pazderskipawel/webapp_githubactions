@@ -85,7 +85,9 @@ jobs:
     runs-on: [self-hosted]
     steps:
       - name: Start WordPress Containers
-        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --build
+        run: |
+          echo "for detailed wiev run command 'docker compose --env-file .env -f webapp/docker-compose.yml up -d --build'" 
+          docker compose --env-file .env -f webapp/docker-compose.yml up -d
       - name: Copy configuration files to container
         run: |
           docker exec wordpress /bin/bash -c "chmod +x /var/www/wordpress-config/*.sh"
