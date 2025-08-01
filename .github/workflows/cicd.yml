@@ -105,9 +105,9 @@ jobs:
       - name: Configure WordPress
         run: |
           docker exec wordpress /bin/bash -c "/var/www/wordpress-config/configurewp.sh"
-#      - name: allow http (may cause conflicts with https)
-#        run: |
-#          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
+      - name: set up site url and home url
+        run: |
+          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/setupurls.sh"
 
   notify-on-fail:
     needs: [run-app]
