@@ -40,15 +40,19 @@ jobs:
           docker compose -f webapp/docker-compose.yml down -v --rmi all --remove-orphans
           docker system prune -af --volumes
       - name: Create .env file
-        run: |
-          echo "WORDPRESS_SITE_TITLE=${{ vars.WORDPRESS_SITE_TITLE }}" >> .env
-          echo "WORDPRESS_ADMIN_USER=${{ vars.WORDPRESS_ADMIN_USER }}" >> .env
-          echo "WORDPRESS_ADMIN_PASSWORD=${{ secrets.WORDPRESS_ADMIN_PASSWORD }}" >> .env
-          echo "WORDPRESS_ADMIN_EMAIL=${{ vars.WORDPRESS_ADMIN_EMAIL }}" >> .env      
-          echo "WORDPRESS_DB_NAME=${{ vars.WORDPRESS_DB_NAME }}" >> .env
-          echo "WORDPRESS_DB_USER=${{ vars.WORDPRESS_DB_USER }}" >> .env
-          echo "WORDPRESS_DB_PASSWORD=${{ secrets.WORDPRESS_DB_PASSWORD }}" >> .env
-          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_WORDPRESS_SITE_TITLE: ${{ vars.WORDPRESS_SITE_TITLE }}
+          envkey_WORDPRESS_ADMIN_USER: ${{ vars.WORDPRESS_ADMIN_USER }}
+          envkey_WORDPRESS_ADMIN_PASSWORD: ${{ secrets.WORDPRESS_ADMIN_PASSWORD }}
+          envkey_WORDPRESS_ADMIN_EMAIL: ${{ vars.WORDPRESS_ADMIN_EMAIL }}    
+          envkey_WORDPRESS_DB_NAME: ${{ vars.WORDPRESS_DB_NAME }}
+          envkey_WORDPRESS_DB_USER: ${{ vars.WORDPRESS_DB_USER }}
+          envkey_WORDPRESS_DB_PASSWORD: ${{ secrets.WORDPRESS_DB_PASSWORD }}
+          envkey_MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          file_name: .env
+          fail_on_empty: false
+          sort_keys: false
       - name: Prepare bind mount directories
         run: |
           export DIRS="webapp/backups"
