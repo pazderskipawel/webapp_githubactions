@@ -44,8 +44,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ../localhost.pem:/etc/ssl/certs/localhost.pem:ro
-      - ../localhost-key.pem:/etc/ssl/private/localhost-key.pem:ro
+      - ./localhost.pem:/etc/ssl/certs/localhost.pem:ro
+      - ./localhost-key.pem:/etc/ssl/private/localhost-key.pem:ro
 
 volumes:
   db_data:

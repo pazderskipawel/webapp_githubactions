@@ -68,6 +68,7 @@ jobs:
               mkcert -install
             fi
             mkcert localhost
+            mv *.pem ./webapp/nginx-config/
           else
             echo "Certificates already exist."
           fi
@@ -100,7 +101,7 @@ jobs:
       - name: allow http
         run: |
           docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
-          
+
   notify-on-fail:
     needs: [set-up-environment, validate-app, run-app]
     runs-on: [self-hosted]
