@@ -42,12 +42,15 @@ services:
       - wordpress
     ports:
       - "443:443"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     volumes:
       - ./nginx-config/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx-config/localhost.pem:/etc/ssl/certs/localhost.pem:ro
       - ./nginx-config/localhost-key.pem:/etc/ssl/private/localhost-key.pem:ro
-    #networks:
-    #  - wp-net
+    networks:
+      - wp-net
 
 volumes:
   db_data:
