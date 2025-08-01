@@ -11,7 +11,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  pre-checks:
+  set-up-environment:
     runs-on: [self-hosted]
     steps:
       - name: Checkout code
@@ -58,12 +58,24 @@ jobs:
           export DIRS="webapp/backups"
           mkdir -p $DIRS
           chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} $DIRS
+      - name: create certificates if not exist
+        run: | 
+          if [ ! -f ./localhost.pem ] || [ ! -f ./localhost-key.pem ]; then
+            echo "Creating certificates..."
+            sudo apt update
+            sudo apt install libnss3-tools && mkcert -install
+            mkcert localhost
+          else
+            echo "Certificates already exist."
+          fi
+
   validate-app:
-    needs: pre-checks
+    needs: set-up-environment
     runs-on: [self-hosted]
     steps:
       - name: Validate Docker Compose File
         run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --dry-run
+
   run-app:
     needs: validate-app
     runs-on: [self-hosted]
@@ -86,7 +98,7 @@ jobs:
         run: |
           docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
   notify-on-fail:
-    needs: [pre-checks, validate-app, run-app]
+    needs: [set-up-environment, validate-app, run-app]
     runs-on: [self-hosted]
     steps:
       - name: Notify Discord on failure

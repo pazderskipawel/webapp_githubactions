@@ -35,6 +35,17 @@ services:
     networks:
       - wp-net
 
+  https:
+    image: nginx:latest
+    container_name: https
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      - ./localhost.pem:/etc/ssl/certs/localhost.pem:ro
+      - ./localhost-key.pem:/etc/ssl/private/localhost-key.pem:ro
+
 volumes:
   db_data:
 
