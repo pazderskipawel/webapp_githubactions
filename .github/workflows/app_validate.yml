@@ -1,0 +1,12 @@
+name: Validate docker application
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  validate-app:
+    runs-on: [self-hosted]
+    steps:
+      - name: Validate Docker Compose File
+        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --dry-run

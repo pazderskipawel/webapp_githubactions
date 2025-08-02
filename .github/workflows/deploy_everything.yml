@@ -1,0 +1,31 @@
+name: Main Pipeline
+
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true 
+
+jobs:
+  prepare-environment:
+    uses: ./.github/workflows/environment_prepare.yml
+    secrets: 
+      WORDPRESS_ADMIN_PASSWORD: ${{ secrets.WORDPRESS_ADMIN_PASSWORD }}
+      WORDPRESS_DB_PASSWORD: ${{ secrets.WORDPRESS_DB_PASSWORD }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      RUNNER_SUDO_PASSWD: ${{ secrets.RUNNER_SUDO_PASSWD }}
+
+  validate-app:
+    needs: prepare-environment
+    uses: ./.github/workflows/app_validate.yml
+
+  run-app:
+    needs: validate-app
+    uses:  ./.github/workflows/app_run.yml
+
+  #notify-on-fail:
+  #  uses: ./.github/workflows/notifications/discord.yml

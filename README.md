@@ -4,7 +4,7 @@ Configuration for wordpress is stored in bash scripts so they can be used also i
 Main workflow is setting everything up automatically on self-hosted linux machine (ubuntu)
 
 Workflow pipeline for main branch
-[![CI](https://github.com/pazderskipawel/githubactions/actions/workflows/cicd.yml/badge.svg?branch=main)](https://github.com/pazderskipawel/githubactions/actions/workflows/cicd.yml?query=branch%3Amain)
+[![CI](https://github.com/pazderskipawel/githubactions/actions/workflows/deploy_everything.yml/badge.svg?branch=main)](https://github.com/pazderskipawel/githubactions/actions/workflows/deploy_everything.yml?query=branch%3Amain)
 
 Setting up self-hosted runner
 - This repo is using self hosted ubuntu runner
