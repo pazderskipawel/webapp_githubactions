@@ -1,0 +1,26 @@
+name: Main Pipeline
+
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true 
+
+jobs:
+  set-up-environment:
+    uses: ./.github/workflows/environment/prepare.yml
+
+  validate-app:
+    needs: set-up-environment
+    uses: ./.github/workflows/application/validate_app.yml
+
+  run-app:
+    needs: validate-app
+    uses: ./.github/workflows/application/run_app.yml
+
+  #notify-on-fail:
+  #  uses: ./.github/workflows/notifications/discord.yml
