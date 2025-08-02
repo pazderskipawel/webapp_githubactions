@@ -30,4 +30,4 @@ jobs:
   notify-if-any-step-fails:
     needs: [prepare-environment, validate-app, run-app]
     if: failure()
-    uses: ./.github/workflows/notfication_discord.yml
+    uses: ./.github/workflows/notification_discord.yml
