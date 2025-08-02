@@ -1,7 +1,6 @@
 name: Prepare Environment
 
 on:
-  workflow_dispatch:
   workflow_call: 
     secrets:
       WORDPRESS_ADMIN_PASSWORD: 
