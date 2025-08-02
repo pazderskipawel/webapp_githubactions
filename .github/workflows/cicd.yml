@@ -11,7 +11,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  pre-checks:
+  set-up-environment:
     runs-on: [self-hosted]
     steps:
       - name: Checkout code
@@ -58,19 +58,42 @@ jobs:
           export DIRS="webapp/backups"
           mkdir -p $DIRS
           chown ${{ vars.OS_USERNAME }}:${{ vars.OS_USERGROUP }} $DIRS
+      - name: create certificates if not exist
+        run: | 
+          if [ ! -f ./localhost.pem ] || [ ! -f ./localhost-key.pem ]; then
+            echo "Creating certificates..."
+            if ! command -v mkcert &> /dev/null; then
+              echo "${{ secrets.RUNNER_SUDO_PASSWD }}" | sudo -S apt update -y
+              echo "${{ secrets.RUNNER_SUDO_PASSWD }}" | sudo -S apt install -y libnss3-tools mkcert
+              mkcert -install
+            fi
+            mkcert localhost
+            mv *.pem ./webapp/nginx-config/
+          else
+            echo "Certificates already exist."
+          fi
+
   validate-app:
-    needs: pre-checks
+    needs: set-up-environment
     runs-on: [self-hosted]
     steps:
       - name: Validate Docker Compose File
         run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --dry-run
+
   run-app:
     needs: validate-app
     runs-on: [self-hosted]
     steps:
       - name: Start WordPress Containers
-        run: docker compose --env-file .env -f webapp/docker-compose.yml up -d --build
-      - name: Copy configuration files to container
+        run: |
+          echo "for detailed wiev run command 'docker compose --env-file .env -f webapp/docker-compose.yml up -d --build'" 
+          docker compose --env-file .env -f webapp/docker-compose.yml up -d
+      - name: Copy Nginx configuration files to container to enable https
+        # This step is necessary to the server to handle HTTPS using mkcert.
+        run: |
+          docker exec https /bin/bash -c "mv /etc/nginx/nginx-config/*.conf /etc/nginx/conf.d/"
+          docker exec https /bin/bash -c "service nginx reload"
+      - name: Copy wordpress configuration files to container
         run: |
           docker exec wordpress /bin/bash -c "chmod +x /var/www/wordpress-config/*.sh"
       - name: Add user for wordpress CLI
@@ -82,19 +105,20 @@ jobs:
       - name: Configure WordPress
         run: |
           docker exec wordpress /bin/bash -c "/var/www/wordpress-config/configurewp.sh"
-      - name: allow http
+      - name: set up site url and home url
         run: |
-          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/allowhttp.sh"
-  notify-on-fail:
-    needs: [pre-checks, validate-app, run-app]
-    runs-on: [self-hosted]
-    steps:
-      - name: Notify Discord on failure
-        #https://github.com/marketplace/actions/actions-status-discord
-        uses: sarisia/actions-status-discord@v1
-        if: failure()
-        with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          title: "❌ Build Failed"
-          description: "Job `${{ github.job }}` in workflow `${{ github.workflow }}` failed on `${{ github.ref_name }}`."
-          color: 0xff0000
+          docker exec wordpress /bin/bash -c "/var/www/wordpress-config/setupurls.sh"
+
+#  notify-on-fail:
+#    needs: [run-app]
+#    runs-on: [self-hosted]
+#    steps:
+#      - name: Notify Discord on failure
+#        #https://github.com/marketplace/actions/actions-status-discord
+#        uses: sarisia/actions-status-discord@v1
+#        if: failure()
+#        with:
+#          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+#          title: "❌ Build Failed"
+#          description: "Job `${{ github.job }}` in workflow `${{ github.workflow }}` failed on `${{ github.ref_name }}`."
+#          color: 0xff0000
