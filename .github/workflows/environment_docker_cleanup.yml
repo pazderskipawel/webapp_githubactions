@@ -1,0 +1,14 @@
+name: cleanup docker images and containers
+
+on:
+  workflow_dispatch:
+  workflow_call: 
+
+jobs:
+  cleanup-docker:
+    runs-on: [self-hosted]
+    steps:
+        - name: Checkout code
+          run: |
+            docker compose -f webapp/docker-compose.yml down -v --rmi all --remove-orphans
+            docker system prune -af --volumes

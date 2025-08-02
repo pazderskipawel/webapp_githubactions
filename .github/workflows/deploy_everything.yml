@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true 
 
 jobs:
-  set-up-environment:
+  prepare-environment:
     uses: ./.github/workflows/environment_prepare.yml
     secrets: 
       WORDPRESS_ADMIN_PASSWORD: ${{ secrets.WORDPRESS_ADMIN_PASSWORD }}
@@ -20,7 +20,7 @@ jobs:
       RUNNER_SUDO_PASSWD: ${{ secrets.RUNNER_SUDO_PASSWD }}
 
   validate-app:
-    needs: set-up-environment
+    needs: prepare-environment
     uses: ./.github/workflows/app_validate.yml
 
   run-app:

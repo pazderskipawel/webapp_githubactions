@@ -15,12 +15,12 @@ on:
   
 
 jobs:
-  set-up-environment:
+  check-out-environment:
     runs-on: [self-hosted]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
-      - name: Check and Install Docker & Compose
+      - name: Check and Install Docker & Docker Compose
         run: |
           if ! command -v docker &> /dev/null; then
             echo "Docker is not installed. Installing Docker..."
@@ -39,10 +39,13 @@ jobs:
           else
             echo "Docker Compose is already installed."
           fi
-      - name: Clean up last build
-        run: |
-          docker compose -f webapp/docker-compose.yml down -v --rmi all --remove-orphans
-          docker system prune -af --volumes
+  clean-up-last-build:
+    needs: check-out-environment
+    uses: ./.github/workflows/environment_docker_cleanup.yml
+  prepare-environment-for-app:
+    needs: clean-up-last-build
+    runs-on: [self-hosted]
+    steps:
       - name: Create .env file
         uses: SpicyPizza/create-envfile@v2.0
         with:
