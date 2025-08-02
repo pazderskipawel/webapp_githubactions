@@ -13,6 +13,11 @@ concurrency:
 jobs:
   set-up-environment:
     uses: ./.github/workflows/environment_prepare.yml
+    secrets: 
+      WORDPRESS_ADMIN_PASSWORD: ${{ secrets.WORDPRESS_ADMIN_PASSWORD }}
+      WORDPRESS_DB_PASSWORD: ${{ secrets.WORDPRESS_DB_PASSWORD }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      RUNNER_SUDO_PASSWD: ${{ secrets.RUNNER_SUDO_PASSWD }}
 
   validate-app:
     needs: set-up-environment

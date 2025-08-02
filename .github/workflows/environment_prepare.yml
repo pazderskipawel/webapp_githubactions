@@ -2,7 +2,17 @@ name: Prepare Environment
 
 on:
   workflow_dispatch:
-  workflow_call:  
+  workflow_call: 
+    secrets:
+      WORDPRESS_ADMIN_PASSWORD: 
+        required: true
+      WORDPRESS_DB_PASSWORD: 
+        required: true
+      MYSQL_ROOT_PASSWORD: 
+        required: true
+      RUNNER_SUDO_PASSWD: 
+        required: true
+  
 
 jobs:
   set-up-environment:
