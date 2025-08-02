@@ -12,15 +12,15 @@ concurrency:
 
 jobs:
   set-up-environment:
-    uses: ./.github/workflows/environment/prepare.yml
+    uses: ./.github/workflows/environment_prepare.yml
 
   validate-app:
     needs: set-up-environment
-    uses: ./.github/workflows/application/validate_app.yml
+    uses: ./.github/workflows/app_validate.yml
 
   run-app:
     needs: validate-app
-    uses: ./.github/workflows/application/run_app.yml
+    uses:  ./.github/workflows/app_run.yml
 
   #notify-on-fail:
   #  uses: ./.github/workflows/notifications/discord.yml
